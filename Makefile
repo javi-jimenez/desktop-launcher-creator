@@ -1,21 +1,24 @@
 .PHONY: help deps install run test lint format clean build \
-        flatpak-build flatpak-install snap-build release
+        flatpak-build flatpak-install snap-build release \
+        drone-cli-install drone-local
 
 # Default target
 help:
 	@echo "Available targets:"
-	@echo "  deps             Install Debian system dependencies (requires sudo)"
-	@echo "  install          Install Python dependencies with Poetry"
-	@echo "  run              Run the application"
-	@echo "  test             Run the test suite"
-	@echo "  lint             Run static checks"
-	@echo "  format           Format the code"
-	@echo "  build            Build the Python package"
-	@echo "  flatpak-build    Build the Flatpak bundle"
-	@echo "  flatpak-install  Build and install the Flatpak for the current user"
-	@echo "  snap-build       Build the Snap package"
-	@echo "  release          Tag a release (VERSION=x.y.z) and push it"
-	@echo "  clean            Remove build artifacts and caches"
+	@echo "  deps              Install Debian system dependencies (requires sudo)"
+	@echo "  install           Install Python dependencies with Poetry"
+	@echo "  run               Run the application"
+	@echo "  test              Run the test suite"
+	@echo "  lint              Run static checks"
+	@echo "  format            Format the code"
+	@echo "  build             Build the Python package"
+	@echo "  flatpak-build     Build the Flatpak bundle"
+	@echo "  flatpak-install   Build and install the Flatpak for the current user"
+	@echo "  snap-build        Build the Snap package"
+	@echo "  drone-cli-install Install the Drone CLI into ~/.local/bin"
+	@echo "  drone-local       Run the Drone pipeline locally with 'drone exec'"
+	@echo "  release           Tag a release (VERSION=x.y.z) and push it"
+	@echo "  clean             Remove build artifacts and caches"
 
 # Debian system dependencies
 deps:
@@ -61,6 +64,30 @@ flatpak-install:
 # Build the Snap package
 snap-build:
 	cd packaging/snap && snapcraft
+
+# Install the Drone CLI into ~/.local/bin (no sudo needed)
+DRONE_VERSION ?= 1.9.0
+DRONE_BIN := $(HOME)/.local/bin/drone
+drone-cli-install:
+	@mkdir -p $(HOME)/.local/bin
+	@if [ -x "$(DRONE_BIN)" ]; then \
+		echo "Drone CLI ya instalada: $$($(DRONE_BIN) --version)"; \
+	else \
+		echo "Instalando Drone CLI $(DRONE_VERSION)..."; \
+		curl -sSL -o /tmp/drone.tar.gz \
+			https://github.com/harness/drone-cli/releases/download/v$(DRONE_VERSION)/drone_linux_amd64.tar.gz; \
+		tar -xzf /tmp/drone.tar.gz -C /tmp drone; \
+		mv /tmp/drone $(DRONE_BIN); \
+		chmod +x $(DRONE_BIN); \
+		rm -f /tmp/drone.tar.gz; \
+		echo "Instalada: $$($(DRONE_BIN) --version)"; \
+	fi
+
+# Run the Drone pipeline locally (no server needed).
+# Uses the default 'bridge' Docker network on purpose: custom subnets break DNS.
+# Excludes the 'release' step, which requires the Drone server.
+drone-local: drone-cli-install
+	$(DRONE_BIN) exec --pipeline default --exclude release --branch main
 
 # Tag a release and push it (usage: make release VERSION=0.2.0)
 release:
