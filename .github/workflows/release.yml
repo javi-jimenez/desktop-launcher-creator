@@ -32,8 +32,31 @@ jobs:
       - name: Construir paquete
         run: poetry build
 
+      - name: Construir Flatpak
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --if-not-exists --user flathub \
+            https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub org.gnome.Platform//47 org.gnome.Sdk//47
+          flatpak-builder --force-clean --repo=repo build-dir \
+            packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
+          flatpak build-bundle repo desktop-launcher-creator.flatpak \
+            io.github.javi_jimenez.DesktopLauncherCreator
+
+      - name: Construir Snap
+        uses: snapcore/action-build@v1
+        id: snapcraft
+        with:
+          path: packaging/snap
+
+      - name: Copiar Snap a la raíz
+        run: cp ${{ steps.snapcraft.outputs.snap }} .
+
       - name: Crear GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*
+          files: |
+            dist/*
+            desktop-launcher-creator.flatpak
+            *.snap
           generate_release_notes: true

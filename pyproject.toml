@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "desktop-launcher-creator"
-version = "0.1.0"
+version = "0.2.0"
 description = "Crea lanzadores de escritorio (.desktop) a partir de las aplicaciones instaladas en el sistema (Debian, Snap y Flatpak)."
 authors = ["Javier Jiménez <javi-jimenez@users.noreply.github.com>"]
 license = "GPL-3.0-or-later"

@@ -41,6 +41,16 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.0" date="2026-10-02">
+      <description>
+        <p>Empaquetado para distribución:</p>
+        <ul>
+          <li>Manifiesto Flatpak corregido para el SDK de GNOME 47.</li>
+          <li>Snap actualizado a base core24.</li>
+          <li>Automatización de release (wheel/sdist, Flatpak y Snap).</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.1.0" date="2026-10-02">
       <description>
         <p>Primera versión pública.</p>

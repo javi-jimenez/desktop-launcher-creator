@@ -45,6 +45,37 @@ steps:
       branch:
         - main
 
+  # Construye el bundle Flatpak. Requiere flatpak + flatpak-builder y el
+  # runtime org.gnome.Platform 47 (se descarga de Flathub la primera vez).
+  - name: flatpak
+    image: ubuntu:24.04
+    commands:
+      - apt-get -o Acquire::ForceIPv4=true update
+      - apt-get -o Acquire::ForceIPv4=true install -y flatpak flatpak-builder
+      - flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
+      - flatpak install --user -y flathub org.gnome.Platform//47 org.gnome.Sdk//47
+      - flatpak-builder --force-clean --repo=repo build-dir packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
+      - flatpak build-bundle repo desktop-launcher-creator.flatpak io.github.javi_jimenez.DesktopLauncherCreator
+    when:
+      event:
+        - tag
+      status:
+        - success
+
+  # Construye el Snap. Se ejecuta en el contenedor oficial de snapcraft.
+  - name: snap
+    image: snapcore/snapcraft:stable
+    commands:
+      - apt-get update
+      - apt-get install -y git
+      - cd packaging/snap && snapcraft --destructive-mode
+      - cp packaging/snap/*.snap . 2>/dev/null || true
+    when:
+      event:
+        - tag
+      status:
+        - success
+
   - name: release
     image: plugins/gitea-release
     settings:
@@ -54,6 +85,8 @@ steps:
       files:
         - dist/*.whl
         - dist/*.tar.gz
+        - desktop-launcher-creator.flatpak
+        - "*.snap"
       title: ${DRONE_TAG}
       note: Generado automáticamente por Drone CI
     when:

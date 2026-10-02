@@ -1,6 +1,10 @@
 .PHONY: help deps install run test lint format clean build \
-        flatpak-build flatpak-install snap-build release \
+        flatpak-build flatpak-install flatpak-bundle snap-build snap-lint \
+        release release-local release-push \
         drone-cli-install drone-local
+
+VERSION ?= $(shell poetry version --short 2>/dev/null || echo "0.0.0")
+APP_ID  := io.github.javi_jimenez.DesktopLauncherCreator
 
 # Default target
 help:
@@ -11,13 +15,17 @@ help:
 	@echo "  test              Run the test suite"
 	@echo "  lint              Run static checks"
 	@echo "  format            Format the code"
-	@echo "  build             Build the Python package"
-	@echo "  flatpak-build     Build the Flatpak bundle"
+	@echo "  build             Build the Python package (wheel + sdist)"
+	@echo "  flatpak-build     Build the Flatpak (into build-dir)"
+	@echo "  flatpak-bundle    Build and export the .flatpak bundle"
 	@echo "  flatpak-install   Build and install the Flatpak for the current user"
 	@echo "  snap-build        Build the Snap package"
+	@echo "  snap-lint         Lint the snapcraft.yaml"
+	@echo "  release-local     Build all artifacts into dist/ (no push)"
+	@echo "  release-push      Tag v\$$(VERSION) and push to gitea"
+	@echo "  release           release-local + release-push"
 	@echo "  drone-cli-install Install the Drone CLI into ~/.local/bin"
 	@echo "  drone-local       Run the Drone pipeline locally with 'drone exec'"
-	@echo "  release           Tag a release (VERSION=x.y.z) and push it"
 	@echo "  clean             Remove build artifacts and caches"
 
 # Debian system dependencies
@@ -49,21 +57,60 @@ format:
 build:
 	poetry build
 
-# Build the Flatpak bundle
+# Build the Flatpak (into build-dir, no bundle)
 flatpak-build:
 	flatpak-builder --force-clean --repo=repo build-dir \
-		packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
-	flatpak build-bundle repo desktop-launcher-creator.flatpak \
-		io.github.javi_jimenez.DesktopLauncherCreator
+		packaging/flatpak/$(APP_ID).yml
+
+# Build and export the .flatpak bundle into dist/
+flatpak-bundle: build
+	@mkdir -p dist
+	flatpak-builder --force-clean --repo=repo build-dir \
+		packaging/flatpak/$(APP_ID).yml
+	flatpak build-bundle repo dist/desktop-launcher-creator-$(VERSION).flatpak $(APP_ID)
 
 # Build and install the Flatpak for the current user
 flatpak-install:
 	flatpak-builder --user --install --force-clean build-dir \
-		packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
+		packaging/flatpak/$(APP_ID).yml
 
 # Build the Snap package
 snap-build:
 	cd packaging/snap && snapcraft
+
+# Lint the snapcraft.yaml
+snap-lint:
+	cd packaging/snap && snapcraft lint
+
+# Build every release artifact into dist/ (no push)
+release-local: build
+	@mkdir -p dist
+	@echo "==> Artefactos Python en dist/"
+	@ls -lh dist/
+	@if command -v flatpak-builder >/dev/null 2>&1; then \
+		echo "==> Construyendo Flatpak..."; \
+		$(MAKE) flatpak-bundle; \
+	else \
+		echo "!! flatpak-builder no instalado; se omite el Flatpak"; \
+	fi
+	@if command -v snapcraft >/dev/null 2>&1; then \
+		echo "==> Construyendo Snap..."; \
+		cd packaging/snap && snapcraft --destructive-mode; \
+		cp packaging/snap/*.snap dist/ 2>/dev/null || true; \
+	else \
+		echo "!! snapcraft no instalado; se omite el Snap"; \
+	fi
+	@echo "==> Contenido final de dist/"; ls -lh dist/
+
+# Tag the current VERSION and push it to gitea
+release-push:
+	@test -n "$(VERSION)" || (echo "Uso: make release VERSION=x.y.z" && exit 1)
+	@git diff --quiet || (echo "Hay cambios sin commitear; haz commit antes de release." && exit 1)
+	git tag -a v$(VERSION) -m "Release v$(VERSION)"
+	git push gitea v$(VERSION)
+
+# Full release: build artifacts locally, then tag and push
+release: release-local release-push
 
 # Install the Drone CLI into ~/.local/bin (no sudo needed)
 DRONE_VERSION ?= 1.9.0
@@ -86,18 +133,16 @@ drone-cli-install:
 # Run the Drone pipeline locally (no server needed).
 # Uses the default 'bridge' Docker network on purpose: custom subnets break DNS.
 # Excludes the 'release' step, which requires the Drone server.
+# --event push is required so steps gated with `when: event: [tag, push]`
+# (the 'build' step) are actually executed by `drone exec`.
 drone-local: drone-cli-install
-	$(DRONE_BIN) exec --pipeline default --exclude release --branch main
-
-# Tag a release and push it (usage: make release VERSION=0.2.0)
-release:
-	@test -n "$(VERSION)" || (echo "Uso: make release VERSION=x.y.z" && exit 1)
-	git tag -a v$(VERSION) -m "Release v$(VERSION)"
-	git push origin v$(VERSION)
+	$(DRONE_BIN) exec --pipeline default --exclude release \
+		--branch main --event push
 
 # Clean build artifacts and caches
 clean:
 	rm -rf dist build repo build-dir desktop-launcher-creator.flatpak
+	rm -f packaging/snap/*.snap
 	find . -type d -name "__pycache__" -exec rm -rf {} +
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +

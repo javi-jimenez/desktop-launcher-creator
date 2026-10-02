@@ -1,6 +1,6 @@
 name: desktop-launcher-creator
-base: core22
-version: '0.1.0'
+base: core24
+version: '0.2.0'
 summary: Crea lanzadores de escritorio a partir de tus aplicaciones instaladas
 description: |
   Desktop Launcher Creator es una utilidad gráfica que te permite crear
@@ -56,17 +56,19 @@ parts:
   desktop-launcher-creator:
     plugin: python
     source: .
-    python-packages:
-      - pygobject
-      - pycairo
+    # PyGObject y pycairo las aportan los paquetes del sistema (stage-packages),
+    # evitando compilarlas desde el código fuente.
+    python-packages: []
     build-packages:
-      - libgirepository1.0-dev
+      - python3-dev
+      - libgirepository-2.0-dev
       - libcairo2-dev
-      - gir1.2-gtk-3.0
       - pkg-config
     stage-packages:
+      - python3-gi
+      - python3-gi-cairo
       - gir1.2-gtk-3.0
-      - libgtk-3-0
+      - libgtk-3-0t64
     override-build: |
       craftctl default
       # Instalar el .desktop, metadatos e icono

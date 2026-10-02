@@ -47,9 +47,9 @@ make run       # ejecuta la aplicación
 El manifiesto está en `packaging/flatpak/`. Requiere `flatpak-builder`:
 
 ```bash
-make flatpak-build
-flatpak-builder --user --install --force-clean build-dir \
-  packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
+make flatpak-build     # compila en build-dir/
+make flatpak-bundle    # genera dist/desktop-launcher-creator-<versión>.flatpak
+make flatpak-install   # compila e instala para el usuario actual
 ```
 
 ### Snap
@@ -57,8 +57,22 @@ flatpak-builder --user --install --force-clean build-dir \
 El `snapcraft.yaml` está en `packaging/snap/`. Requiere `snapcraft`:
 
 ```bash
-make snap-build
+make snap-build        # genera el .snap
+make snap-lint         # valida el snapcraft.yaml
 ```
+
+## Release
+
+El flujo de release construye todos los artefactos y luego crea la etiqueta:
+
+```bash
+make release-local     # construye wheel + sdist + .flatpak + .snap en dist/
+make release-push      # crea la etiqueta vX.Y.Z y la sube a gitea
+make release           # ambos pasos
+```
+
+La versión se toma automáticamente de `pyproject.toml`. Los artefactos se
+publican en la release de Gitea mediante Drone CI (paso `release`).
 
 ## Desarrollo
 
