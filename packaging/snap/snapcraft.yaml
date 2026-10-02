@@ -1,0 +1,78 @@
+name: desktop-launcher-creator
+base: core22
+version: '0.1.0'
+summary: Crea lanzadores de escritorio a partir de tus aplicaciones instaladas
+description: |
+  Desktop Launcher Creator es una utilidad gráfica que te permite crear
+  lanzadores de escritorio (.desktop) a partir de las aplicaciones ya
+  instaladas en tu sistema.
+
+  Descubre automáticamente las aplicaciones provenientes de paquetes
+  Debian, Snap y Flatpak, muestra sus iconos reales y te permite copiarlas
+  a la carpeta que elijas (por ejemplo ~/Aplicaciones).
+
+  Características:
+   - Detección de aplicaciones de Debian, Snap y Flatpak.
+   - Búsqueda instantánea por nombre.
+   - Vista de lista o de cuadrícula, con iconos reales.
+   - Opción de cargar o no los iconos.
+   - Selección de la carpeta de destino.
+
+grade: stable
+confinement: strict
+license: GPL-3.0-or-later
+contact: https://github.com/javi-jimenez/desktop-launcher-creator/issues
+issues: https://github.com/javi-jimenez/desktop-launcher-creator/issues
+source-code: https://github.com/javi-jimenez/desktop-launcher-creator
+website: https://github.com/javi-jimenez/desktop-launcher-creator
+
+icon: packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg
+
+apps:
+  desktop-launcher-creator:
+    command: bin/desktop-launcher-creator
+    extensions: [gnome]
+    plugs:
+      - home
+      - desktop
+      - desktop-legacy
+      - wayland
+      - x11
+      - gsettings
+      - opengl
+      # Acceso de solo lectura a los .desktop del sistema
+      - system-files
+
+plugs:
+  system-files:
+    interface: system-files
+    read:
+      - /usr/share/applications
+      - /usr/local/share/applications
+      - /var/lib/snapd/desktop/applications
+      - /var/lib/flatpak/exports/share/applications
+
+parts:
+  desktop-launcher-creator:
+    plugin: python
+    source: .
+    python-packages:
+      - pygobject
+      - pycairo
+    build-packages:
+      - libgirepository1.0-dev
+      - libcairo2-dev
+      - gir1.2-gtk-3.0
+      - pkg-config
+    stage-packages:
+      - gir1.2-gtk-3.0
+      - libgtk-3-0
+    override-build: |
+      craftctl default
+      # Instalar el .desktop, metadatos e icono
+      install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.desktop \
+        $CRAFT_PART_INSTALL/usr/share/applications/io.github.javi_jimenez.DesktopLauncherCreator.desktop
+      install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml \
+        $CRAFT_PART_INSTALL/usr/share/metainfo/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml
+      install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg \
+        $CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/io.github.javi_jimenez.DesktopLauncherCreator.svg

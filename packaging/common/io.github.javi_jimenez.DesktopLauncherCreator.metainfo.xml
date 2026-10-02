@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.javi_jimenez.DesktopLauncherCreator</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>Desktop Launcher Creator</name>
+  <summary>Crea lanzadores de escritorio a partir de tus aplicaciones instaladas</summary>
+
+  <description>
+    <p>
+      Desktop Launcher Creator es una utilidad gráfica que te permite crear
+      lanzadores de escritorio (<code>.desktop</code>) a partir de las
+      aplicaciones ya instaladas en tu sistema.
+    </p>
+    <p>
+      Descubre automáticamente las aplicaciones provenientes de paquetes
+      Debian, Snap y Flatpak, muestra sus iconos reales y te permite copiarlas
+      a la carpeta que elijas (por ejemplo <code>~/Aplicaciones</code>) para
+      tenerlas siempre a mano.
+    </p>
+    <p>Características:</p>
+    <ul>
+      <li>Detección de aplicaciones de Debian, Snap y Flatpak.</li>
+      <li>Búsqueda instantánea por nombre.</li>
+      <li>Vista de lista o de cuadrícula, con iconos reales.</li>
+      <li>Opción de cargar o no los iconos.</li>
+      <li>Selección de la carpeta de destino.</li>
+    </ul>
+  </description>
+
+  <launchable type="desktop-id">io.github.javi_jimenez.DesktopLauncherCreator.desktop</launchable>
+
+  <url type="homepage">https://github.com/javi-jimenez/desktop-launcher-creator</url>
+  <url type="bugtracker">https://github.com/javi-jimenez/desktop-launcher-creator/issues</url>
+
+  <developer id="io.github.javi_jimenez">
+    <name>Javier Jiménez</name>
+  </developer>
+
+  <content_rating type="oars-1.1"/>
+
+  <releases>
+    <release version="0.1.0" date="2026-10-02">
+      <description>
+        <p>Primera versión pública.</p>
+      </description>
+    </release>
+  </releases>
+
+  <categories>
+    <category>Utility</category>
+    <category>Settings</category>
+  </categories>
+
+  <keywords>
+    <keyword>launcher</keyword>
+    <keyword>desktop</keyword>
+    <keyword>aplicaciones</keyword>
+    <keyword>accesos</keyword>
+  </keywords>
+
+  <screenshots>
+    <screenshot type="default">
+      <caption>Lista de aplicaciones instaladas</caption>
+      <image>https://raw.githubusercontent.com/javi-jimenez/desktop-launcher-creator/main/packaging/common/screenshot-list.png</image>
+    </screenshot>
+    <screenshot>
+      <caption>Vista de cuadrícula con iconos</caption>
+      <image>https://raw.githubusercontent.com/javi-jimenez/desktop-launcher-creator/main/packaging/common/screenshot-grid.png</image>
+    </screenshot>
+  </screenshots>
+</component>

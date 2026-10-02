@@ -1,0 +1,36 @@
+app-id: io.github.javi_jimenez.DesktopLauncherCreator
+runtime: org.gnome.Platform
+runtime-version: '47'
+sdk: org.gnome.Sdk
+command: desktop-launcher-creator
+finish-args:
+  # Interfaz gráfica (X11 y Wayland)
+  - --socket=wayland
+  - --socket=fallback-x11
+  - --share=ipc
+  - --device=dri
+  # Acceso a los archivos .desktop del sistema y del usuario
+  - --filesystem=/usr/share/applications:ro
+  - --filesystem=/usr/local/share/applications:ro
+  - --filesystem=~/.local/share/applications:ro
+  # Aplicaciones Snap y Flatpak instaladas
+  - --filesystem=/var/lib/snapd/desktop/applications:ro
+  - --filesystem=/var/lib/flatpak/exports/share/applications:ro
+  - --filesystem=~/.local/share/flatpak/exports/share/applications:ro
+  # Carpeta de destino por defecto y home para elegir destino
+  - --filesystem=home
+
+modules:
+  - name: desktop-launcher-creator
+    buildsystem: simple
+    build-commands:
+      - pip3 install --prefix=/app --no-deps .
+      - install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.desktop
+        /app/share/applications/io.github.javi_jimenez.DesktopLauncherCreator.desktop
+      - install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml
+        /app/share/metainfo/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml
+      - install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg
+        /app/share/icons/hicolor/scalable/apps/io.github.javi_jimenez.DesktopLauncherCreator.svg
+    sources:
+      - type: dir
+        path: ../..

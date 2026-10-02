@@ -1,0 +1,11 @@
+[Desktop Entry]
+Name=Desktop Launcher Creator
+GenericName=Creador de lanzadores
+Comment=Crea lanzadores de escritorio a partir de tus aplicaciones instaladas
+Exec=desktop-launcher-creator
+Icon=io.github.javi_jimenez.DesktopLauncherCreator
+Terminal=false
+Type=Application
+Categories=Utility;Settings;
+Keywords=launcher;desktop;aplicaciones;
+StartupNotify=true

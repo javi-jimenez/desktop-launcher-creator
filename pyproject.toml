@@ -1,0 +1,33 @@
+[tool.poetry]
+name = "desktop-launcher-creator"
+version = "0.1.0"
+description = "Crea lanzadores de escritorio (.desktop) a partir de las aplicaciones instaladas en el sistema (Debian, Snap y Flatpak)."
+authors = ["Javier Jiménez <javi-jimenez@users.noreply.github.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+homepage = "https://github.com/javi-jimenez/desktop-launcher-creator"
+repository = "https://github.com/javi-jimenez/desktop-launcher-creator"
+keywords = ["gtk", "desktop", "launcher", "gnome", "flatpak", "snap"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: GTK",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Desktop Environment",
+]
+packages = [{ include = "desktop_launcher_creator" }]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+pygobject = "^3.58.0"
+pycairo = "^1.29.1"
+
+[tool.poetry.scripts]
+desktop-launcher-creator = "desktop_launcher_creator.main:main"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
