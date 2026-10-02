@@ -31,8 +31,8 @@
 
   <launchable type="desktop-id">io.github.javi_jimenez.DesktopLauncherCreator.desktop</launchable>
 
-  <url type="homepage">https://github.com/javi-jimenez/desktop-launcher-creator</url>
-  <url type="bugtracker">https://github.com/javi-jimenez/desktop-launcher-creator/issues</url>
+  <url type="homepage">https://gitea.app.brisecom.net/gitea/desktop-launcher-creator</url>
+  <url type="bugtracker">https://gitea.app.brisecom.net/gitea/desktop-launcher-creator/issues</url>
 
   <developer id="io.github.javi_jimenez">
     <name>Javier Jiménez</name>
@@ -63,11 +63,11 @@
   <screenshots>
     <screenshot type="default">
       <caption>Lista de aplicaciones instaladas</caption>
-      <image>https://raw.githubusercontent.com/javi-jimenez/desktop-launcher-creator/main/packaging/common/screenshot-list.png</image>
+      <image>https://gitea.app.brisecom.net/gitea/desktop-launcher-creator/raw/branch/main/packaging/common/screenshot-list.png</image>
     </screenshot>
     <screenshot>
       <caption>Vista de cuadrícula con iconos</caption>
-      <image>https://raw.githubusercontent.com/javi-jimenez/desktop-launcher-creator/main/packaging/common/screenshot-grid.png</image>
+      <image>https://gitea.app.brisecom.net/gitea/desktop-launcher-creator/raw/branch/main/packaging/common/screenshot-grid.png</image>
     </screenshot>
   </screenshots>
 </component>

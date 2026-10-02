@@ -73,6 +73,14 @@ make clean     # limpia artefactos
 - **GitHub Actions**: `.github/workflows/ci.yml` y `release.yml`.
 - **Drone CI** (compatible con Gitea): `.drone.yml`.
 
+Infraestructura:
+
+| Servicio | URL |
+|----------|-----|
+| Repositorio (Gitea) | https://gitea.app.brisecom.net/gitea/desktop-launcher-creator |
+| Drone CI | https://drone.app.brisecom.net |
+| GitHub (espejo) | https://github.com/javi-jimenez/desktop-launcher-creator |
+
 Para el release en Gitea, define el secreto `gitea_token` en Drone con un token
 de acceso de Gitea.
 

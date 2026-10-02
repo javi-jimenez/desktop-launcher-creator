@@ -5,8 +5,8 @@ description = "Crea lanzadores de escritorio (.desktop) a partir de las aplicaci
 authors = ["Javier Jiménez <javi-jimenez@users.noreply.github.com>"]
 license = "GPL-3.0-or-later"
 readme = "README.md"
-homepage = "https://github.com/javi-jimenez/desktop-launcher-creator"
-repository = "https://github.com/javi-jimenez/desktop-launcher-creator"
+homepage = "https://gitea.app.brisecom.net/gitea/desktop-launcher-creator"
+repository = "https://gitea.app.brisecom.net/gitea/desktop-launcher-creator"
 keywords = ["gtk", "desktop", "launcher", "gnome", "flatpak", "snap"]
 classifiers = [
     "Development Status :: 4 - Beta",

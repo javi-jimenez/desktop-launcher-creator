@@ -21,10 +21,10 @@ description: |
 grade: stable
 confinement: strict
 license: GPL-3.0-or-later
-contact: https://github.com/javi-jimenez/desktop-launcher-creator/issues
-issues: https://github.com/javi-jimenez/desktop-launcher-creator/issues
-source-code: https://github.com/javi-jimenez/desktop-launcher-creator
-website: https://github.com/javi-jimenez/desktop-launcher-creator
+contact: https://gitea.app.brisecom.net/gitea/desktop-launcher-creator/issues
+issues: https://gitea.app.brisecom.net/gitea/desktop-launcher-creator/issues
+source-code: https://gitea.app.brisecom.net/gitea/desktop-launcher-creator
+website: https://gitea.app.brisecom.net/gitea/desktop-launcher-creator
 
 icon: packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg
 
