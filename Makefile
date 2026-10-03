@@ -1,21 +1,24 @@
-.PHONY: help deps install run test lint format clean build \
-        flatpak-build flatpak-install flatpak-bundle snap-build snap-lint \
+.PHONY: help deps deps-packaging install run test lint format clean build \
+        packages flatpak-build flatpak-install flatpak-bundle snap-build snap-lint \
         release release-local release-push \
         drone-cli-install drone-local
 
 VERSION ?= $(shell poetry version --short 2>/dev/null || echo "0.0.0")
 APP_ID  := io.github.javi_jimenez.DesktopLauncherCreator
+FLATHUB := https://flathub.org/repo/flathub.flatpakrepo
 
 # Default target
 help:
 	@echo "Available targets:"
 	@echo "  deps              Install Debian system dependencies (requires sudo)"
+	@echo "  deps-packaging    Install flatpak-builder and snapcraft (requires sudo)"
 	@echo "  install           Install Python dependencies with Poetry"
 	@echo "  run               Run the application"
 	@echo "  test              Run the test suite"
 	@echo "  lint              Run static checks"
 	@echo "  format            Format the code"
 	@echo "  build             Build the Python package (wheel + sdist)"
+	@echo "  packages          Build Snap AND Flatpak into dist/ (one command)"
 	@echo "  flatpak-build     Build the Flatpak (into build-dir)"
 	@echo "  flatpak-bundle    Build and export the .flatpak bundle"
 	@echo "  flatpak-install   Build and install the Flatpak for the current user"
@@ -28,10 +31,21 @@ help:
 	@echo "  drone-local       Run the Drone pipeline locally with 'drone exec'"
 	@echo "  clean             Remove build artifacts and caches"
 
-# Debian system dependencies
+# Debian system dependencies (build + runtime para la app)
 deps:
 	sudo apt update
 	sudo apt install -y libgirepository-2.0-dev libgirepository1.0-dev gir1.2-gtk-3.0 libcairo2-dev
+
+# Herramientas de empaquetado (Flatpak + Snap)
+deps-packaging:
+	sudo apt update
+	sudo apt install -y flatpak flatpak-builder squashfs-tools
+	@if ! command -v snapcraft >/dev/null 2>&1; then \
+		echo "==> Instalando snapcraft vía snap..."; \
+		sudo snap install snapcraft --classic; \
+	fi
+	@echo "==> Añadiendo el remoto Flathub (usuario)..."
+	-flatpak remote-add --if-not-exists --user flathub $(FLATHUB)
 
 # Python dependencies
 install:
@@ -56,6 +70,21 @@ format:
 # Build the package
 build:
 	poetry build
+
+# Construye AMBOS paquetes (Snap y Flatpak) en dist/ con un solo comando.
+# Instala previamente las herramientas si faltan (requiere sudo).
+packages: deps-packaging
+	@mkdir -p dist
+	@echo "==> Construyendo Snap..."
+	cd packaging/snap && snapcraft --destructive-mode
+	cp packaging/snap/*.snap dist/
+	@echo "==> Construyendo Flatpak..."
+	flatpak install --user -y flathub org.gnome.Platform//47 org.gnome.Sdk//47 || true
+	flatpak-builder --force-clean --repo=repo build-dir \
+		packaging/flatpak/$(APP_ID).yml
+	flatpak build-bundle repo dist/desktop-launcher-creator-$(VERSION).flatpak $(APP_ID)
+	@echo "==> Artefactos en dist/:"
+	@ls -lh dist/
 
 # Build the Flatpak (into build-dir, no bundle)
 flatpak-build:

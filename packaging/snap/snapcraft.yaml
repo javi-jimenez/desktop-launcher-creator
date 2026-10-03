@@ -26,7 +26,8 @@ issues: https://gitea.app.brisecom.net/gitea/desktop-launcher-creator/issues
 source-code: https://gitea.app.brisecom.net/gitea/desktop-launcher-creator
 website: https://gitea.app.brisecom.net/gitea/desktop-launcher-creator
 
-icon: packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg
+# La ruta del icono es relativa a este snapcraft.yaml (packaging/snap/).
+icon: ../common/io.github.javi_jimenez.DesktopLauncherCreator.svg
 
 apps:
   desktop-launcher-creator:
@@ -71,10 +72,12 @@ parts:
       - libgtk-3-0t64
     override-build: |
       craftctl default
-      # Instalar el .desktop, metadatos e icono
-      install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.desktop \
+      # Instalar el .desktop, metadatos e icono.
+      # $CRAFT_PROJECT_DIR es packaging/snap; ../.. llega a la raíz del repo.
+      _root="$CRAFT_PROJECT_DIR/../.."
+      install -Dm644 "$_root/packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.desktop" \
         $CRAFT_PART_INSTALL/usr/share/applications/io.github.javi_jimenez.DesktopLauncherCreator.desktop
-      install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml \
+      install -Dm644 "$_root/packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml" \
         $CRAFT_PART_INSTALL/usr/share/metainfo/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml
-      install -Dm644 packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg \
+      install -Dm644 "$_root/packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg" \
         $CRAFT_PART_INSTALL/usr/share/icons/hicolor/scalable/apps/io.github.javi_jimenez.DesktopLauncherCreator.svg
