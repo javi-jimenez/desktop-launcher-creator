@@ -1,0 +1,19 @@
+# Normaliza finales de línea en el repo (se guardan con LF).
+* text=auto eol=lf
+
+# Los binarios de empaquetado no deben tratarse como texto.
+*.snap    binary
+*.flatpak binary
+*.png     binary
+*.svg     text
+
+# --- Contenido que NO debe entrar en los tarballs de release (sdist).
+#     Así el .tar.gz publicado solo contiene el paquete Python + metadatos.
+/.github/       export-ignore
+/.drone.yml     export-ignore
+/deploy/        export-ignore
+/packaging/     export-ignore
+/tests/         export-ignore
+/Makefile       export-ignore
+/.gitattributes export-ignore
+/.gitignore     export-ignore

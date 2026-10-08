@@ -1,6 +1,8 @@
 app-id: io.github.javi_jimenez.DesktopLauncherCreator
 runtime: org.gnome.Platform
-runtime-version: '47'
+# Debe coincidir con el runtime/sdk que instalan los workflows de CI
+# (org.gnome.Platform//49 y org.gnome.Sdk//49).
+runtime-version: '49'
 sdk: org.gnome.Sdk
 command: desktop-launcher-creator
 

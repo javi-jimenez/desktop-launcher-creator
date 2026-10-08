@@ -20,6 +20,12 @@ venv/
 build-dir/
 repo/
 
+# Salida de compilación de snapcraft (snapcraft --destructive-mode)
+packaging/snap/parts/
+packaging/snap/stage/
+packaging/snap/prime/
+packaging/snap/*.snap
+
 # Editores
 .vscode/
 .idea/

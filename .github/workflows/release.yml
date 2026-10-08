@@ -29,19 +29,18 @@ jobs:
           python-version: '3.12'
           cache: poetry
 
-      - name: Construir paquete
+      # La versión del paquete Python sale de pyproject.toml (ya sincronizada
+      # con el tag al hacer `make release VERSION=x.y.z`).
+      - name: Construir wheel + sdist
         run: poetry build
 
-      - name: Construir Flatpak
+      # El snapcraft.yaml lleva la versión fijada; la sobreescribimos con la del
+      # tag para que Snap Store no rechace la revisión por versión duplicada.
+      - name: Sincronizar versión del snap con el tag
         run: |
-          sudo apt-get install -y flatpak flatpak-builder
-          flatpak remote-add --if-not-exists --user flathub \
-            https://flathub.org/repo/flathub.flatpakrepo
-          flatpak install --user -y flathub org.gnome.Platform//47 org.gnome.Sdk//47
-          flatpak-builder --force-clean --repo=repo build-dir \
-            packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
-          flatpak build-bundle repo desktop-launcher-creator.flatpak \
-            io.github.javi_jimenez.DesktopLauncherCreator
+          VERSION="${GITHUB_REF_NAME#v}"
+          sed -i "s/^version: .*/version: '${VERSION}'/" packaging/snap/snapcraft.yaml
+          grep -n '^version:' packaging/snap/snapcraft.yaml
 
       - name: Construir Snap
         uses: snapcore/action-build@v1
@@ -49,14 +48,24 @@ jobs:
         with:
           path: packaging/snap
 
-      - name: Copiar Snap a la raíz
-        run: cp ${{ steps.snapcraft.outputs.snap }} .
+      - name: Construir Flatpak
+        run: |
+          sudo apt-get install -y flatpak flatpak-builder
+          flatpak remote-add --if-not-exists --user flathub \
+            https://flathub.org/repo/flathub.flatpakrepo
+          flatpak install --user -y flathub \
+            org.gnome.Platform//49 org.gnome.Sdk//49
+          flatpak-builder --force-clean --repo=repo build-dir \
+            packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
+          flatpak build-bundle repo desktop-launcher-creator.flatpak \
+            io.github.javi_jimenez.DesktopLauncherCreator
 
       - name: Crear GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
-            dist/*
+            dist/*.whl
+            dist/*.tar.gz
             desktop-launcher-creator.flatpak
-            *.snap
+            ${{ steps.snapcraft.outputs.snap }}
           generate_release_notes: true

@@ -46,14 +46,14 @@ steps:
         - main
 
   # Construye el bundle Flatpak. Requiere flatpak + flatpak-builder y el
-  # runtime org.gnome.Platform 47 (se descarga de Flathub la primera vez).
+  # runtime org.gnome.Platform 49 (se descarga de Flathub la primera vez).
   - name: flatpak
     image: ubuntu:24.04
     commands:
       - apt-get -o Acquire::ForceIPv4=true update
       - apt-get -o Acquire::ForceIPv4=true install -y flatpak flatpak-builder
       - flatpak remote-add --if-not-exists --user flathub https://flathub.org/repo/flathub.flatpakrepo
-      - flatpak install --user -y flathub org.gnome.Platform//47 org.gnome.Sdk//47
+      - flatpak install --user -y flathub org.gnome.Platform//49 org.gnome.Sdk//49
       - flatpak-builder --force-clean --repo=repo build-dir packaging/flatpak/io.github.javi_jimenez.DesktopLauncherCreator.yml
       - flatpak build-bundle repo desktop-launcher-creator.flatpak io.github.javi_jimenez.DesktopLauncherCreator
     when:
@@ -63,11 +63,13 @@ steps:
         - success
 
   # Construye el Snap. Se ejecuta en el contenedor oficial de snapcraft.
+  # La versión se toma del tag para que Snap Store no rechace la revisión.
   - name: snap
     image: snapcore/snapcraft:stable
     commands:
       - apt-get update
       - apt-get install -y git
+      - sed -i "s/^version: .*/version: '${DRONE_TAG#v}'/" packaging/snap/snapcraft.yaml
       - cd packaging/snap && snapcraft --destructive-mode
       - cp packaging/snap/*.snap . 2>/dev/null || true
     when:
