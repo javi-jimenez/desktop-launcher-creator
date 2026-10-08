@@ -28,6 +28,12 @@ finish-args:
 modules:
   - name: desktop-launcher-creator
     buildsystem: simple
+    # El backend de build es poetry-core, que pip descarga desde PyPI.
+    # El sandbox de flatpak-builder no tiene red por defecto, así que hay que
+    # habilitarla explícitamente para compilar el paquete.
+    build-options:
+      build-args:
+        - --share=network
     build-commands:
       # Instalar el paquete Python en /app (sin dependencias: las aporta el SDK)
       - pip3 install --prefix=/app --no-deps .
