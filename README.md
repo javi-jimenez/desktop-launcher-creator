@@ -61,18 +61,29 @@ make snap-build        # genera el .snap
 make snap-lint         # valida el snapcraft.yaml
 ```
 
-## Release
-
-El flujo de release construye todos los artefactos y luego crea la etiqueta:
+### Debian y AppImage
 
 ```bash
-make release-local     # construye wheel + sdist + .flatpak + .snap en dist/
+make deb-build         # genera el .deb en dist/
+make appimage-build    # genera el AppImage (requiere appimage-builder)
+```
+
+## Release
+
+Al subir una etiqueta `vX.Y.Z`, Drone construye wheel/sdist, `.deb`, Snap,
+Flatpak y AppImage, y publica los archivos en una release de Gitea. La etiqueta
+se crea y sube así:
+
+```bash
+make release-local     # construye los formatos disponibles localmente en dist/
 make release-push      # crea la etiqueta vX.Y.Z y la sube a gitea
 make release           # ambos pasos
 ```
 
-La versión se toma automáticamente de `pyproject.toml`. Los artefactos se
-publican en la release de Gitea mediante Drone CI (paso `release`).
+La versión se toma de `pyproject.toml` al crear la etiqueta. Para publicar en
+Gitea, el repositorio debe estar activado en Drone y tener configurado el
+secreto `gitea_token`. El workflow de GitHub Actions construye los mismos
+formatos para cuando se habilite la publicación allí.
 
 ## Desarrollo
 

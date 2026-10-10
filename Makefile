@@ -1,5 +1,5 @@
 .PHONY: help deps deps-packaging install run test lint format clean build \
-        packages flatpak-build flatpak-install flatpak-bundle snap-build snap-lint \
+	packages flatpak-build flatpak-install flatpak-bundle snap-build snap-lint deb-build appimage-build \
         release release-local release-push \
         drone-cli-install drone-local
 
@@ -24,6 +24,8 @@ help:
 	@echo "  flatpak-install   Build and install the Flatpak for the current user"
 	@echo "  snap-build        Build the Snap package"
 	@echo "  snap-lint         Lint the snapcraft.yaml"
+	@echo "  deb-build         Build the Debian package into dist/"
+	@echo "  appimage-build    Build the AppImage (requires appimage-builder)"
 	@echo "  release-local     Build all artifacts into dist/ (no push)"
 	@echo "  release-push      Tag v\$$(VERSION) and push to gitea"
 	@echo "  release           release-local + release-push"
@@ -111,11 +113,28 @@ snap-build:
 snap-lint:
 	cd packaging/snap && snapcraft lint
 
+# Build the Debian package into dist/
+deb-build:
+	bash packaging/deb/build.sh $(VERSION)
+
+# Build the AppImage (the official appimage-builder container works locally too)
+appimage-build:
+	PROJECT_DIR=$(CURDIR) VERSION=$(VERSION) appimage-builder --recipe packaging/appimage/AppImageBuilder.yml --skip-test
+	mv desktop-launcher-creator-$(VERSION)-x86_64.AppImage dist/
+
 # Build every release artifact into dist/ (no push)
 release-local: build
 	@mkdir -p dist
+	@echo "==> Construyendo paquete Debian..."
+	@$(MAKE) deb-build
 	@echo "==> Artefactos Python en dist/"
 	@ls -lh dist/
+	@if command -v appimage-builder >/dev/null 2>&1; then \
+		echo "==> Construyendo AppImage..."; \
+		$(MAKE) appimage-build; \
+	else \
+		echo "!! appimage-builder no instalado; se omite el AppImage"; \
+	fi
 	@if command -v flatpak-builder >/dev/null 2>&1; then \
 		echo "==> Construyendo Flatpak..."; \
 		$(MAKE) flatpak-bundle; \

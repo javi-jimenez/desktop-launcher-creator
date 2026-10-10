@@ -1,0 +1,42 @@
+version: 1
+
+AppDir:
+  path: ./AppDir
+  app_info:
+    id: io.github.javi_jimenez.DesktopLauncherCreator
+    name: Desktop Launcher Creator
+    icon: io.github.javi_jimenez.DesktopLauncherCreator
+    version: "{{VERSION}}"
+    exec: usr/bin/python3
+    exec_args: -m desktop_launcher_creator.main $@
+  apt:
+    arch: amd64
+    sources:
+      - sourceline: "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ noble main universe"
+        key_url: "https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x871920D1991BC93C"
+    include:
+      - python3
+      - python3-gi
+      - python3-cairo
+      - gir1.2-gtk-3.0
+      - libgtk-3-0t64
+      - coreutils
+      - dash
+  after_bundle: |
+    install -d "$TARGET_APPDIR/usr/lib/python3/dist-packages"
+    cp -a "$PROJECT_DIR/desktop_launcher_creator" "$TARGET_APPDIR/usr/lib/python3/dist-packages/"
+    find "$TARGET_APPDIR/usr/lib/python3/dist-packages" -type d -name __pycache__ -prune -exec rm -rf {} +
+    install -Dm644 "$PROJECT_DIR/packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.desktop" "$TARGET_APPDIR/usr/share/applications/io.github.javi_jimenez.DesktopLauncherCreator.desktop"
+    sed -i 's/^Exec=.*/Exec=AppRun/' "$TARGET_APPDIR/usr/share/applications/io.github.javi_jimenez.DesktopLauncherCreator.desktop"
+    install -Dm644 "$PROJECT_DIR/packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.svg" "$TARGET_APPDIR/usr/share/icons/hicolor/scalable/apps/io.github.javi_jimenez.DesktopLauncherCreator.svg"
+    ln -sf usr/share/applications/io.github.javi_jimenez.DesktopLauncherCreator.desktop "$TARGET_APPDIR/io.github.javi_jimenez.DesktopLauncherCreator.desktop"
+    ln -sf usr/share/icons/hicolor/scalable/apps/io.github.javi_jimenez.DesktopLauncherCreator.svg "$TARGET_APPDIR/io.github.javi_jimenez.DesktopLauncherCreator.svg"
+    install -Dm644 "$PROJECT_DIR/LICENSE" "$TARGET_APPDIR/usr/share/licenses/desktop-launcher-creator/LICENSE"
+  runtime:
+    env:
+      GI_TYPELIB_PATH: "${APPDIR}/usr/lib/x86_64-linux-gnu/girepository-1.0"
+      PYTHONPATH: "${APPDIR}/usr/lib/python3/dist-packages"
+
+AppImage:
+  arch: x86_64
+  file_name: desktop-launcher-creator-{{VERSION}}-x86_64.AppImage

@@ -34,6 +34,9 @@ jobs:
       - name: Construir wheel + sdist
         run: poetry build
 
+      - name: Construir paquete Debian
+        run: bash packaging/deb/build.sh "${GITHUB_REF_NAME#v}"
+
       # El snapcraft.yaml lleva la versión fijada; la sobreescribimos con la del
       # tag para que Snap Store no rechace la revisión por versión duplicada.
       - name: Sincronizar versión del snap con el tag
@@ -60,12 +63,25 @@ jobs:
           flatpak build-bundle repo desktop-launcher-creator.flatpak \
             io.github.javi_jimenez.DesktopLauncherCreator
 
+      - name: Construir AppImage
+        env:
+          VERSION: ${{ github.ref_name }}
+        run: |
+          VERSION="${VERSION#v}"
+          docker run --rm --privileged \
+            -v "$GITHUB_WORKSPACE:/work" -w /work \
+            -e VERSION="$VERSION" -e PROJECT_DIR=/work \
+            appimagecrafters/appimage-builder:latest \
+            appimage-builder --recipe packaging/appimage/AppImageBuilder.yml --skip-test
+
       - name: Crear GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           files: |
             dist/*.whl
             dist/*.tar.gz
+            dist/*.deb
             desktop-launcher-creator.flatpak
+            desktop-launcher-creator-*.AppImage
             ${{ steps.snapcraft.outputs.snap }}
           generate_release_notes: true

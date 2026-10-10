@@ -16,9 +16,14 @@ venv/
 # Empaquetado
 *.snap
 *.flatpak
+*.AppImage
 .flatpak-builder/
 build-dir/
 repo/
+
+# Salida de compilación de appimage-builder
+AppDir/
+appimage-builder-cache/
 
 # Salida de compilación de snapcraft (snapcraft --destructive-mode)
 packaging/snap/parts/

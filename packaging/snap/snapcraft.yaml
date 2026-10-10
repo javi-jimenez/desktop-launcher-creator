@@ -56,7 +56,8 @@ plugs:
 parts:
   desktop-launcher-creator:
     plugin: python
-    source: .
+    # El proyecto Python vive en la raíz del repo (dos niveles arriba).
+    source: ../..
     # PyGObject y pycairo las aportan los paquetes del sistema (stage-packages),
     # evitando compilarlas desde el código fuente.
     python-packages: []
@@ -73,8 +74,8 @@ parts:
     override-build: |
       craftctl default
       # Instalar el .desktop, metadatos e icono.
-      # $CRAFT_PROJECT_DIR es packaging/snap; ../.. llega a la raíz del repo.
-      _root="$CRAFT_PROJECT_DIR/../.."
+      # Con source=../.. el árbol del repo queda en $CRAFT_PART_SRC.
+      _root="$CRAFT_PART_SRC"
       install -Dm644 "$_root/packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.desktop" \
         $CRAFT_PART_INSTALL/usr/share/applications/io.github.javi_jimenez.DesktopLauncherCreator.desktop
       install -Dm644 "$_root/packaging/common/io.github.javi_jimenez.DesktopLauncherCreator.metainfo.xml" \

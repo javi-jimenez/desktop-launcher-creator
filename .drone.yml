@@ -69,9 +69,30 @@ steps:
     commands:
       - apt-get update
       - apt-get install -y git
-      - sed -i "s/^version: .*/version: '${DRONE_TAG#v}'/" packaging/snap/snapcraft.yaml
+      - |
+        sed -i "s/^version: .*/version: '${DRONE_TAG#v}'/" packaging/snap/snapcraft.yaml
       - cd packaging/snap && snapcraft --destructive-mode
       - cp packaging/snap/*.snap . 2>/dev/null || true
+    when:
+      event:
+        - tag
+      status:
+        - success
+
+  - name: deb
+    image: ubuntu:24.04
+    commands:
+      - bash packaging/deb/build.sh "${DRONE_TAG#v}"
+    when:
+      event:
+        - tag
+      status:
+        - success
+
+  - name: appimage
+    image: appimagecrafters/appimage-builder:latest
+    commands:
+      - PROJECT_DIR="$PWD" VERSION="${DRONE_TAG#v}" appimage-builder --recipe packaging/appimage/AppImageBuilder.yml --skip-test
     when:
       event:
         - tag
@@ -87,8 +108,10 @@ steps:
       files:
         - dist/*.whl
         - dist/*.tar.gz
+        - dist/*.deb
         - desktop-launcher-creator.flatpak
         - "*.snap"
+        - "*.AppImage"
       title: ${DRONE_TAG}
       note: Generado automáticamente por Drone CI
     when:
