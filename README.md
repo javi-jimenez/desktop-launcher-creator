@@ -4,7 +4,10 @@ Crea lanzadores de escritorio (`.desktop`) a partir de las aplicaciones ya
 instaladas en tu sistema, detectando automáticamente paquetes **Debian**,
 **Snap** y **Flatpak**.
 
-![Lista de aplicaciones](packaging/common/screenshot-list.png)
+![Interfaz de Desktop Launcher Creator: pestañas por origen (Debian/Snap/Flatpak) y la lista de aplicaciones instaladas con sus iconos](packaging/common/screenshot-list.png)
+
+*Así se ve: eliges el origen (Debian, Snap o Flatpak), la app lista las
+aplicaciones instaladas con sus iconos reales y creas el lanzador con un clic.*
 
 ## Características
 
