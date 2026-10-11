@@ -21,13 +21,9 @@ steps:
       # PyGObject/pycairo se usan desde el sistema (python3-gi/python3-cairo),
       # evitando compilarlos y el conflicto con PEP 668.
       - pip install --break-system-packages -e . --no-deps
+      - pip install --break-system-packages pytest
       - python3 -m compileall desktop_launcher_creator
-      - |
-        if python3 -c "import pytest" 2>/dev/null; then
-          xvfb-run -a pytest -q
-        else
-          echo "pytest no instalado; se omite"
-        fi
+      - xvfb-run -a pytest -q
       - xvfb-run -a timeout 8 python3 -m desktop_launcher_creator.main || test $? -eq 124
 
   - name: build
