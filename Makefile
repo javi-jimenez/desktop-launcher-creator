@@ -58,7 +58,10 @@ run:
 	poetry run python -m desktop_launcher_creator.main
 
 # Run tests
+# pytest NO va en las deps de Poetry (resolver el lock con pygobject se cuelga);
+# se instala en el venv de Poetry si falta.
 test:
+	@poetry run python -c "import pytest" 2>/dev/null || poetry run python -m pip install -q pytest
 	poetry run pytest
 
 # Static checks

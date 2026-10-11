@@ -34,18 +34,15 @@ jobs:
           cache: poetry
 
       - name: Instalar dependencias
-        run: poetry install
+        run: |
+          poetry install
+          poetry run pip install pytest
 
       - name: Compilar
         run: poetry run python -m compileall desktop_launcher_creator
 
       - name: Ejecutar pruebas
-        run: |
-          if poetry run python -c "import pytest" 2>/dev/null; then
-            xvfb-run -a poetry run pytest -q
-          else
-            echo "pytest no instalado; se omite"
-          fi
+        run: xvfb-run -a poetry run pytest -q
 
       - name: Verificar arranque de la app (headless)
         run: |
