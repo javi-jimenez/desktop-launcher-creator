@@ -1,0 +1,89 @@
+# Workflow de Gitea Actions para publicar releases.
+# Se ejecuta al empujar un tag v* y adjunta los artefactos al release de Gitea.
+# Corre en el act_runner del cluster (label ubuntu-24.04).
+#
+# NOTA: Gitea Actions es compatible con GitHub Actions. A diferencia del
+# workflow de GitHub (.github/workflows/release.yml), aquí publicamos en Gitea
+# usando su API con el token automático de Actions (secrets.GITHUB_TOKEN), que
+# Gitea inyecta en cada ejecución. NO usamos softprops/action-gh-release porque
+# apunta a la API de GitHub.
+name: Release
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Dependencias del sistema
+        run: |
+          sudo apt-get -o Acquire::ForceIPv4=true update
+          sudo apt-get -o Acquire::ForceIPv4=true install -y \
+            python3 python3-pip python3-venv pipx dpkg-dev \
+            libgirepository-2.0-dev libgirepository1.0-dev \
+            gir1.2-gtk-3.0 libcairo2-dev
+
+      - name: Instalar Poetry
+        run: |
+          pipx install poetry 2>/dev/null || pip install --user poetry
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # La versión del paquete Python sale de pyproject.toml (ya sincronizada
+      # con el tag). `poetry build` genera wheel + sdist en dist/.
+      - name: Construir wheel + sdist
+        run: poetry build
+
+      - name: Construir paquete Debian
+        run: bash packaging/deb/build.sh "${GITHUB_REF_NAME#v}"
+
+      # AppImage vía el contenedor oficial (el runner monta docker.sock).
+      # Best-effort: si el sandbox no permite --privileged, no bloquea la release.
+      - name: Construir AppImage (docker)
+        continue-on-error: true
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          docker run --rm --privileged -v "$PWD:/work" -w /work \
+            -e VERSION="$VERSION" -e PROJECT_DIR=/work \
+            appimagecrafters/appimage-builder:latest \
+            appimage-builder --recipe packaging/appimage/AppImageBuilder.yml --skip-test
+
+      - name: Publicar release en Gitea
+        env:
+          GITEA_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          API="${GITHUB_SERVER_URL}/api/v1/repos/${GITHUB_REPOSITORY}"
+          TAG="${GITHUB_REF_NAME}"
+          AUTH="Authorization: token ${GITEA_TOKEN}"
+
+          echo "==> Creando release ${TAG} en ${GITHUB_REPOSITORY}"
+          body="Release automática generada por Gitea Actions"
+          REL=$(curl -sS -X POST "${API}/releases" \
+            -H "${AUTH}" -H 'Content-Type: application/json' \
+            -d "{\"tag_name\":\"${TAG}\",\"name\":\"${TAG}\",\"body\":\"${body}\",\"draft\":false,\"prerelease\":false}")
+
+          # Si ya existe la release, reutilizar su id.
+          ID=$(echo "${REL}" | python3 -c "import sys,json; d=json.load(sys.stdin); print(d.get('id',''))" 2>/dev/null || true)
+          if [ -z "${ID}" ]; then
+            echo "==> La release ya existía; buscando por tag..."
+            REL=$(curl -sS "${API}/releases/tags/${TAG}" -H "${AUTH}")
+            ID=$(echo "${REL}" | python3 -c "import sys,json; print(json.load(sys.stdin)['id'])")
+          fi
+          echo "==> release id=${ID}"
+
+          shopt -s nullglob
+          subidos=0
+          for f in dist/*.whl dist/*.tar.gz dist/*.deb ./*.AppImage; do
+            [ -f "$f" ] || continue
+            echo "==> Subiendo $(basename "$f")"
+            curl -sS -X POST "${API}/releases/${ID}/assets?name=$(basename "$f")" \
+              -H "${AUTH}" -F "attachment=@${f}" >/dev/null
+            subidos=$((subidos+1))
+          done
+          echo "==> Release ${TAG} publicada con ${subidos} artefacto(s):"
+          echo "    ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/releases/tag/${TAG}"
