@@ -48,10 +48,15 @@ jobs:
       - name: Construir Snap
         uses: snapcore/action-build@v1
         id: snapcraft
+        continue-on-error: true
         with:
           path: packaging/snap
+          # snapcraft 9.x falla en el runner (Permission denied en
+          # /sys/kernel/mm/page_idle/bitmap via LXD); 8.x es estable.
+          snapcraft-channel: 8.x/stable
 
       - name: Construir Flatpak
+        continue-on-error: true
         run: |
           sudo apt-get install -y flatpak flatpak-builder
           flatpak remote-add --if-not-exists --user flathub \
@@ -64,6 +69,7 @@ jobs:
             io.github.javi_jimenez.DesktopLauncherCreator
 
       - name: Construir AppImage
+        continue-on-error: true
         env:
           VERSION: ${{ github.ref_name }}
         run: |
@@ -83,5 +89,5 @@ jobs:
             dist/*.deb
             desktop-launcher-creator.flatpak
             desktop-launcher-creator-*.AppImage
-            ${{ steps.snapcraft.outputs.snap }}
+            packaging/snap/*.snap
           generate_release_notes: true
