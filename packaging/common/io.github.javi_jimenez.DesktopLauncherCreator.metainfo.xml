@@ -41,6 +41,16 @@
   <content_rating type="oars-1.1"/>
 
   <releases>
+    <release version="0.2.1" date="2026-10-12">
+      <description>
+        <p>Calidad y documentación:</p>
+        <ul>
+          <li>Suite de tests, incluida una prueba funcional que crea un lanzador.</li>
+          <li>Captura de la interfaz en el README.</li>
+          <li>Integración continua (Gitea Actions y GitHub Actions) y releases automáticas.</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.2.0" date="2026-10-02">
       <description>
         <p>Empaquetado para distribución:</p>

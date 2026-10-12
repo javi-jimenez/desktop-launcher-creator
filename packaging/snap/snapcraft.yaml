@@ -1,6 +1,6 @@
 name: desktop-launcher-creator
 base: core24
-version: '0.2.0'
+version: '0.2.1'
 summary: Crea lanzadores de escritorio a partir de tus aplicaciones instaladas
 description: |
   Desktop Launcher Creator es una utilidad gráfica que te permite crear
